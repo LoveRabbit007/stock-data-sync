@@ -14,9 +14,9 @@ def sync_all_daily_data():
             print(str_begin)
             begin = add_date(str_begin, 1)
         except Exception:
-            print('发生异常:' + begin)
+            print('发生异常:' + str_begin)
             time.sleep(60)
-            tu_share_api.save_daily(begin, 'daily')
+            tu_share_api.save_daily(str_begin, 'daily')
 
 
 def add_date(date_str, add_count=1):
