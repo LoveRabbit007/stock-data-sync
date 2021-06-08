@@ -7,6 +7,11 @@ client = MongoClient(host='localhost',
 db = client['stock']
 
 
+def exist_data(coll_name, ts_code):
+    collection = db[coll_name]
+    return collection.count({'ts_code': ts_code}, limit=1)
+
+
 def find_all_data(coll_name):
     collection = db[coll_name]
     rows = collection.find({})
