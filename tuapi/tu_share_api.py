@@ -144,3 +144,11 @@ def get_income(ts_code=None, ann_date=None, start_date=None, end_date=None):
                                                                      'undist_profit,	une_prem_reser,update_flag')
     df['_id'] = df['ts_code'] + '-' + df['ann_date'] + '-' + df['end_date'] + '-' + df['update_flag']
     return df
+
+
+def save_daily(trade_date=None, collection_name=None):
+    trade_date = trade_date.replace('-', '')
+    df = pro.daily(trade_date=trade_date)
+    df['_id'] = df['ts_code'] + '-' + df['trade_date']
+    mongodb_util.insert_mongo(df, collection_name)
+    return df
