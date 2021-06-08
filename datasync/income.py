@@ -10,8 +10,16 @@ def sync_all_stock_save_income():
     slice_data = df['_id'].copy()
 
     for ts_code in slice_data:
-        tu_share_api.save_income(ts_code, None, None, None, 'income')
-        time.sleep(2)
+        try:
+            # if mongodb_util.exist_data('income', ts_code) != 0:
+            #     continue
+            tu_share_api.save_income(ts_code, None, None, None, 'income')
+            print(ts_code)
+            time.sleep(2)
+        except BaseException:
+            print('发生异常:' + ts_code)
+            time.sleep(60)
+            tu_share_api.save_income(ts_code, None, None, None, 'income')
 
 
 if __name__ == '__main__':

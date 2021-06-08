@@ -10,8 +10,16 @@ def sync_all_stock_cash_flow():
     slice_data = df['_id'].copy()
 
     for ts_code in slice_data:
-        tu_share_api.save_cash_flow(ts_code, None, None, None, 'cashFlow')
-        time.sleep(2)
+        try:
+            # if mongodb_util.exist_data('cashFlow', ts_code) != 0:
+            #     continue
+            tu_share_api.save_cash_flow(ts_code, None, None, None, 'cashFlow')
+            print(ts_code)
+            time.sleep(2)
+        except BaseException:
+            print('发生异常:' + ts_code)
+            time.sleep(60)
+            tu_share_api.save_cash_flow(ts_code, None, None, None, 'cashFlow')
 
 
 if __name__ == '__main__':
