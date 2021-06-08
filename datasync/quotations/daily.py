@@ -5,7 +5,7 @@ import tuapi.tu_share_api as tu_share_api
 
 
 def sync_all_daily_data():
-    begin = add_date('1990-12-17', 1)
+    begin = add_date('1992-12-05', 1)
     now_date = datetime.today().date()
     while now_date > datetime.date(begin):
         try:
@@ -13,7 +13,7 @@ def sync_all_daily_data():
             tu_share_api.save_daily(str_begin, 'daily')
             print(str_begin)
             begin = add_date(str_begin, 1)
-        except BaseException:
+        except Exception:
             print('发生异常:' + begin)
             time.sleep(60)
             tu_share_api.save_daily(begin, 'daily')
