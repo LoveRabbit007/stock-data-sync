@@ -15,9 +15,13 @@ def find_all_data(coll_name):
 
 
 def insert_mongo(df, database):
+    if len(df) == 0:
+        return
     collection = db[database]
     # 格式转换
-    collection.insert_many(df.to_dict('records'))
+    records = df.to_dict('records')
+    for record in records:
+        collection.save(record)
 
 
 def get_basic_by_ts_code(ts_code=None, trade_date=None, database=None):
