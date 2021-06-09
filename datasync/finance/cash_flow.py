@@ -11,14 +11,14 @@ def sync_all_stock_cash_flow():
 
     for ts_code in slice_data:
         try:
-            # if mongodb_util.exist_data('cashFlow', ts_code) != 0:
-            #     continue
+            if mongodb_util.exist_data('cashFlow', ts_code) != 0:
+                continue
             tu_share_api.save_cash_flow(ts_code, None, None, None, 'cashFlow')
             print(ts_code)
-            time.sleep(2)
+            time.sleep(5)
         except BaseException:
             print('发生异常:' + ts_code)
-            time.sleep(60)
+            time.sleep(110)
             tu_share_api.save_cash_flow(ts_code, None, None, None, 'cashFlow')
 
 
