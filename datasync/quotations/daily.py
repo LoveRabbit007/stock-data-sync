@@ -5,7 +5,7 @@ import tuapi.tu_share_api as tu_share_api
 
 
 def sync_all_daily_data():
-    begin = add_date('1992-12-05', 1)
+    begin = add_date('2005-10-09', 1)
     now_date = datetime.today().date()
     while now_date > datetime.date(begin):
         try:

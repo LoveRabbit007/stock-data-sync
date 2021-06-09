@@ -12,6 +12,11 @@ def exist_data(coll_name, ts_code):
     return collection.count({'ts_code': ts_code}, limit=1)
 
 
+def find_one(coll_name, _id):
+    collection = db[coll_name]
+    return collection.find_one({'_id': _id})
+
+
 def find_all_data(coll_name):
     collection = db[coll_name]
     rows = collection.find({})
@@ -27,6 +32,14 @@ def insert_mongo(df, database):
     records = df.to_dict('records')
     for record in records:
         collection.save(record)
+
+
+def update_one(df, database):
+    condition = {'_id': df['_id']}
+    if len(df) == 0:
+        return
+    collection = db[database]
+    collection.update(condition, df)
 
 
 def get_basic_by_ts_code(ts_code=None, trade_date=None, database=None):

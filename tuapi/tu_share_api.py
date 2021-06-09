@@ -146,9 +146,103 @@ def get_income(ts_code=None, ann_date=None, start_date=None, end_date=None):
     return df
 
 
+def save_income(ts_code=None, ann_date=None, start_date=None, end_date=None, collection_name=None):
+    tag = 1
+    while tag > 0:
+        df = get_income(ts_code, ann_date, start_date, end_date)
+        if len(df) == 100:
+            slice_data = df['end_date'].copy()
+            end_date = min(slice_data)
+            time.sleep(2)
+        else:
+            tag = 0
+        mongodb_util.insert_mongo(df, collection_name)
+
+
+def get_income(ts_code=None, ann_date=None, start_date=None, end_date=None):
+    df = pro.income(ts_code=ts_code, ann_date=ann_date,
+                    start_date=start_date, end_date=end_date, fields='admin_exp,	ann_date,	ass_invest_income,	'
+                                                                     'assets_impair_loss,	basic_eps,	'
+                                                                     'biz_tax_surchg,	comm_exp,	comm_income,	'
+                                                                     'comp_type,	compens_payout,	'
+                                                                     'compens_payout_refu,	compr_inc_attr_m_s,	'
+                                                                     'compr_inc_attr_p,	diluted_eps,	'
+                                                                     'distable_profit,	div_payt,	ebit,	ebitda,	'
+                                                                     'end_date,	f_ann_date,	fin_exp,	forex_gain,	'
+                                                                     'fv_value_chg_gain,	income_tax,	'
+                                                                     'insur_reser_refu,	insurance_exp,	int_exp,	'
+                                                                     'int_income,	invest_income,	minority_gain,	'
+                                                                     'n_asset_mg_income,	n_commis_income,	'
+                                                                     'n_income,	n_income_attr_p,	n_oth_b_income,	'
+                                                                     'n_oth_income,	n_sec_tb_income,	'
+                                                                     'n_sec_uw_income,	nca_disploss,	'
+                                                                     'non_oper_exp,	non_oper_income,	oper_cost,	'
+                                                                     'oper_exp,	operate_profit,	oth_b_income,	'
+                                                                     'oth_compr_income,	other_bus_cost,	out_prem,	'
+                                                                     'prem_earned,	prem_income,	prem_refund,	'
+                                                                     'reins_cost_refund,	reins_exp,	reins_income,	'
+                                                                     'report_type,	reser_insur_liab,	revenue,	'
+                                                                     'sell_exp,	t_compr_income,	total_cogs,	'
+                                                                     'total_profit,	total_revenue,	ts_code,	'
+                                                                     'undist_profit,	une_prem_reser,update_flag')
+    df['_id'] = df['ts_code'] + '-' + df['ann_date'] + '-' + df['end_date'] + '-' + df['update_flag']
+    return df
+
+
+def save_stock_dividend(ts_code=None, ann_date=None, collection_name=None):
+    tag = 1
+    while tag > 0:
+        df = get_stock_dividend(ts_code, ann_date)
+        if len(df) == 100:
+            slice_data = df['end_date'].copy()
+            ann_date = min(slice_data)
+            time.sleep(2)
+        else:
+            tag = 0
+    mongodb_util.insert_mongo(df, collection_name)
+
+
+def get_stock_dividend(ts_code=None, ann_date=None):
+    df = pro.dividend(ts_code=ts_code, ann_date=ann_date)
+    df['_id'] = df['ts_code'] + '-' + df['end_date'] + '-' + df['div_proc']
+    return df
+
+
 def save_daily(trade_date=None, collection_name=None):
     trade_date = trade_date.replace('-', '')
     df = pro.daily(trade_date=trade_date)
     df['_id'] = df['ts_code'] + '-' + df['trade_date']
     mongodb_util.insert_mongo(df, collection_name)
     return df
+
+
+def save_all_stocks(collection_name=None):
+    df = pro.stock_basic(
+        fields='ts_code,symbol,name,area,industry,fullname,enname,cnspell,market,exchange,curr_type,list_status,'
+               'list_date,delist_date,is_hs')
+    df['_id'] = df['ts_code']
+    mongodb_util.insert_mongo(df, collection_name)
+
+
+def save_all_stocks_company(collection_name=None):
+    df = pro.stock_company(
+        fields='ts_code,exchange,chairman,manager,secretary,reg_capital,setup_date,province,city,'
+               'introduction,website,email,'
+               'office,employees,main_business,business_scope')
+    df['_id'] = df['ts_code']
+    mongodb_util.insert_mongo(df, collection_name)
+
+
+def save_all_new_share(collection_name=None, start_date=None):
+    df = pro.new_share(start_date=start_date,
+                       fields='ts_code,sub_code,name,ipo_date,issue_date,'
+                              'amount,amount,price,pe,limit_amount,funds,ballot'
+                       )
+    df['_id'] = df['ts_code']
+    mongodb_util.insert_mongo(df, collection_name)
+
+
+# 您每天最多访问该接口5次
+def save_pro_bar():
+    df = ts.pro_bar(ts_code='300085.SZ', freq='1MIN', adj='qfq', asset='E', start_date='20180816', end_date='20180817')
+    print(df)
