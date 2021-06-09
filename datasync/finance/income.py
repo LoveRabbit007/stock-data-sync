@@ -18,7 +18,7 @@ def sync_all_stock_save_income():
             time.sleep(2)
         except BaseException:
             print('发生异常:' + ts_code)
-            time.sleep(60)
+            time.sleep(80)
             tu_share_api.save_income(ts_code, None, None, None, 'income')
 
 

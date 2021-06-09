@@ -213,6 +213,7 @@ def save_daily(trade_date=None, collection_name=None):
     df = pro.daily(trade_date=trade_date)
     df['_id'] = df['ts_code'] + '-' + df['trade_date']
     mongodb_util.insert_mongo(df, collection_name)
+    print(len(df))
     return df
 
 

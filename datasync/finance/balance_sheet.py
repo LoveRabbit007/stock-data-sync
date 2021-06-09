@@ -15,7 +15,7 @@ def sync_all_stock_balance_sheet():
                 continue
             tu_share_api.save_balance_sheet(ts_code, None, None, None, 'balanceSheet')
             print(ts_code)
-            time.sleep(2)
+            time.sleep(3)
         except BaseException:
             print('发生异常:' + ts_code)
             time.sleep(60)

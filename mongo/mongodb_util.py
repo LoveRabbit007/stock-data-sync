@@ -12,6 +12,11 @@ def exist_data(coll_name, ts_code):
     return collection.count({'ts_code': ts_code}, limit=1)
 
 
+def exist_daily_data(coll_name, trade_date):
+    collection = db[coll_name]
+    return collection.count({'trade_date': trade_date}, limit=1)
+
+
 def find_one(coll_name, _id):
     collection = db[coll_name]
     return collection.find_one({'_id': _id})
