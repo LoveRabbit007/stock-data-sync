@@ -6,7 +6,7 @@ import mongo.mongodb_util as mongodb_util
 
 
 def sync_all_daily_data():
-    begin = add_date('1990-12-09', 1)
+    begin = add_date('2020-05-29', 1)
     now_date = datetime.today().date()
     while now_date > datetime.date(begin):
         try:
@@ -19,8 +19,8 @@ def sync_all_daily_data():
             time.sleep(1)
         except Exception:
             print('发生异常:' + str_begin)
-            time.sleep(60)
-            begin = add_date(str_begin, -2)
+            time.sleep(1)
+        #
 
 
 def add_date(date_str, add_count=1):

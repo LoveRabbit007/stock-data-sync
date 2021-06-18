@@ -35,8 +35,9 @@ def insert_mongo(df, database):
     collection = db[database]
     # 格式转换
     records = df.to_dict('records')
-    for record in records:
-        collection.save(record)
+    collection.insert_many(records)
+    # for record in records:
+    #     collection.save(record)
 
 
 def update_one(df, database):
