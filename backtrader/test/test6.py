@@ -1,13 +1,13 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-
 import datetime  # For datetime objects
 import os.path  # To manage paths
 import sys  # To find out the script name (in argv[0])
 import akshare as ak  # 升级到最新版
 import backtrader as bt
 import pandas as pd
+
 
 # Create a Stratey
 class TestStrategy(bt.Strategy):
@@ -25,6 +25,7 @@ class TestStrategy(bt.Strategy):
         self.dataclose = self.datas[0].close
 
         # To keep track of pending orders and buy price/commission
+        self.tag = None
         self.order = None
         self.buyprice = None
         self.buycomm = None
@@ -82,11 +83,15 @@ class TestStrategy(bt.Strategy):
                  (trade.pnl, trade.pnlcomm))
 
     def next(self):
+
         # Simply log the closing price of the series from the reference
         self.log('Close, %.2f' % self.dataclose[0])
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
+            return
+
+        if self.tag == 0:
             return
 
         # Check if we are in the market
@@ -101,26 +106,51 @@ class TestStrategy(bt.Strategy):
                 self.order = self.buy()
 
         else:
+            value = self.dataclose[-2] - self.dataclose[0]
+            print('涨幅:{:.2%}'.format(value / self.dataclose[0]))
+            percent = format(value / self.dataclose[0])
 
-            if self.dataclose[0] < self.sma[0]:
+            if float(percent) > float(0.12):
                 # SELL, SELL, SELL!!! (with all possible default parameters)
                 self.log('SELL CREATE, %.2f' % self.dataclose[0])
 
                 # Keep track of the created order to avoid a 2nd order
                 self.order = self.sell()
+            value5 = self.dataclose[-5] - self.dataclose[0]
+
+            percent5 = format(value5 / self.dataclose[0])
+
+            if float(percent5) > float(0.30):
+                # SELL, SELL, SELL!!! (with all possible default parameters)
+                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+
+                # Keep track of the created order to avoid a 2nd order
+                print('跌幅超过30%:{:.2%}'.format(value5 / self.dataclose[0]))
+                self.tag = 0
+
+
+class TestSizer(bt.Sizer):
+    params = (('stake', 8000),)
+
+    def _getsizing(self, comminfo, cash, data, isbuy):
+        if isbuy:
+            return self.p.stake
+        position = self.broker.getposition(data)
+        if not position.size:
+            return 0
+        else:
+            return position.size
+        return self.p.stake
 
 
 if __name__ == '__main__':
     # Create a cerebro entity
     cerebro = bt.Cerebro()
 
-    # Add a strategy
-    cerebro.addstrategy(TestStrategy)
-
     # Datas are in a subfolder of the samples. Need to find where the script is
     # because it could have been called from anywhere
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
-    stock_hfq_df = ak.stock_zh_a_hist(symbol="300750", adjust="hfq").iloc[:, :6]
+    stock_hfq_df = ak.stock_zh_a_hist(symbol="300085", adjust="hfq").iloc[:, :6]
     # 处理字段命名，以符合 Backtrader 的要求
     stock_hfq_df.columns = [
         'date',
@@ -133,18 +163,22 @@ if __name__ == '__main__':
     # 把 date 作为日期索引，以符合 Backtrader 的要求
     stock_hfq_df.index = pd.to_datetime(stock_hfq_df['date'])
 
+    # Add a strategy 设置买卖策略
+    cerebro.addstrategy(TestStrategy)
+
     # Create a Data Feed
     data = bt.feeds.PandasData(
         dataname=stock_hfq_df,
         # Do not pass values before this date
-        fromdate=datetime.datetime(2014, 4, 3),
+        fromdate=datetime.datetime(2015, 7, 16),
         # Do not pass values before this date
-        todate=datetime.datetime(2021, 6, 16))
+        todate=datetime.datetime(2021, 7, 16))
 
     # Add the Data Feed to Cerebro
     cerebro.adddata(data)
     # Add a FixedSize sizer according to the stake
-    cerebro.addsizer(bt.sizers.FixedSize, stake=1000)
+    # 设置交易数量
+    cerebro.addsizer(TestSizer)
 
     cerebro.broker.setcommission(commission=0.002)
     # Set our desired cash start
